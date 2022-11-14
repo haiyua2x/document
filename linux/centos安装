@@ -1,0 +1,44 @@
+yum update
+yum install -y gcc-c++
+yum install -y pcre pcre-devel
+yum install -y zlib zlib-devel
+yum install -y openssl openssl-devel
+
+wget -c https://nginx.org/download/nginx-1.12.0.tar.gz
+
+tar -zxvf nginx-1.12.0.tar.gz
+cd nginx-1.12.0/
+#./configure
+# 此方式带ssl证书的方式安装
+./configure --with-http_ssl_module
+make
+make install
+whereis nginx
+
+启动、停止nginx
+cd /usr/local/nginx/sbin/
+./nginx 
+./nginx -s stop
+./nginx -s quit
+./nginx -s reload
+
+启动
+/usr/local/nginx/sbin/nginx
+重启：
+$ /usr/local/nginx/sbin/nginx -s reload
+停止：
+$ /usr/local/nginx/sbin/nginx -s stop
+
+测试配置文件是否正常：
+$ /usr/local/nginx/sbin/nginx -t
+
+强制关闭：
+$ pkill nginx
+
+以上安装方法nginx的配置文件位于
+/usr/local/nginx/conf/nginx.conf
+
+/usr/local/webserver/nginx/sbin/nginx -v
+
+
+
