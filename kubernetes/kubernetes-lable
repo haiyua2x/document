@@ -1,0 +1,18 @@
+
+# 把节点所有的标签全部显示出来
+kubectl get node --show-labels
+# 打上标签
+kubectl label node atscale-clx01 env=test
+
+work节点打标签
+kubectl label node atscale-clx01 testnode=true
+kubectl label nodes atscale-clx01 rebootablenode=true
+
+cpu打特定的标签
+kubectl label node atscale-clx01 cpu=clx
+
+# 删除标签
+kubectl label node node-name env-
+
+给普通用户添加超级管理员权限路径
+vim /usr/share/defaults/sudo/sudoers
