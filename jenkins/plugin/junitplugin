@@ -1,0 +1,10 @@
+网址：
+https://plugins.jenkins.io/junit/
+
+1. 生成junit 需要的ut.xml
+e.g.
+pytest tests/unit --cov src/dtaf_core/drivers  --cov src/dtaf_core/providers --cov src/dtaf_core/lib/private/driver_config --cov  src/dtaf_core/lib/private/provider_config --cov-config=./.ut_coveragerc --cov-report term --cov-report xml:coverage.xml --junit-xml=./ut/ut.xml --html=./ut/utreport.html --durations=10 -n auto
+
+2.收集junit 报告
+e.g.
+junit testResults: '**/dtafcore_ut.xml'
