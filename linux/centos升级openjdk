@@ -1,0 +1,14 @@
+# 1.查看当前jdk版本
+java -version
+# 2.查看当前安装jdk版本
+rpm -qa|grep java
+# 3.卸载jdk
+rpm -e --nodeps java-1.8.0-openjdk-headless-1.8.0.282.b08-1.el7_9.x86_64
+rpm -e --nodeps java-1.8.0-openjdk-1.8.0.282.b08-1.el7_9.x86_64
+rpm -e --nodeps java-1.8.0-openjdk-devel-1.8.0.282.b08-1.el7_9.x86_64
+# 4.查看本地jdk源
+yum search jdk
+# 5.安装jdk
+yum install -y java-11-openjdk.x86_64 java-11-openjdk-devel.x86_64 java-11-openjdk-headless.x86_64
+# 6.查看当前jdk版本
+java -version
