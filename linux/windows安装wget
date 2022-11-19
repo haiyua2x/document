@@ -1,0 +1,14 @@
+windows安装wget
+1. 下载wget-1.11.4-1-setup.exe
+https://jaist.dl.sourceforge.net/project/gnuwin32/wget/1.11.4-1/wget-1.11.4-1-setup.exe
+2. 载后双击安装，全部默认安装（C:\Program Files (x86)\GnuWin32）
+3. 设置系统环境变量
+系统环境变量，新建
+GNU_HOME=C:\Program Files (x86)\GnuWin32
+在path中添加
+%GNU_HOME%\bin
+点击确定环境变量添加完毕
+
+
+实验方法
+wget --no-check-certificate https://xxxx.tar
