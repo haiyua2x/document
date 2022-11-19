@@ -1,0 +1,9 @@
+# centos 下
+yum install -y ntp
+
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+echo "Asia/Shanghai" > /etc/timezone
+ntpdate 10.18.116.209
+
+[root@centos78n2 ~]# crontab -l
+*/5 * * * * /usr/sbin/ntpdate 10.18.116.209
