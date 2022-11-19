@@ -1,0 +1,22 @@
+1.查看开机自启项
+centos7自启项已不用chkconfig改为：
+systemctl list-unit-files
+左边是服务名称，右边是状态，enabled是开机启动，disabled是开机不启动。
+当然还可以过滤一下 比如：查看启动项
+systemctl list-unit-files | grep enable
+2.设置开机自启项
+systemctl enable redis
+systemctl enable nginx.service
+启动nginx
+systemctl start nginx.service
+结束nginx
+systemctl stop nginx.service
+重启nginx
+systemctl restart nginx.service
+
+
+# 根据日期找到20天前的备份 and delete
+find /localdisk/NFS/mysqlData/master -name "mysql-bin*"
+
+查找老文件并且删除
+find /localdisk/NFS/mysqlData/master -name "mysql-bin*"  -mtime +20 |xargs rm -rf
