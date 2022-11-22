@@ -36,7 +36,82 @@ NAME               DESIRED   CURRENT   READY   AGE
 nginx-66bbc9fdc5   3         3         3       48m
 pod 关联 replicasets.apps
 
+1.3 deployment 更新
+#命令行更新
+kubectl set image deploy nginx nginx=nginx:1.15.3 --record
 
+#查看更新状态
+[root@centos78k8swork1 deployment]# kubectl get pod
+NAME                     READY   STATUS        RESTARTS   AGE
+nginx-5dfc8689c6-48jvw   1/1     Running       0          9s
+nginx-5dfc8689c6-67sdh   1/1     Running       0          11s
+nginx-5dfc8689c6-9qvd6   1/1     Running       0          10s
+nginx-66bbc9fdc5-cdlln   0/1     Terminating   0          56m
+nginx-66bbc9fdc5-lk7kz   0/1     Terminating   0          20m
+nginx-66bbc9fdc5-sjtcv   0/1     Terminating   0          44m
+# 查看滚动更新状态
+kubectl rollout status deploy nginx
+[root@centos78k8swork1 deployment]# kubectl rollout status deploy nginx
+Waiting for deployment "nginx" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "nginx" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "nginx" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "nginx" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "nginx" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "nginx" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "nginx" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "nginx" rollout to finish: 1 old replicas are pending termination...
+deployment "nginx" successfully rolled out
+# 回滚
+查看所有的history deploy 的版本
+kubectl rollout history deploy nginx
+e.g.
+[root@centos78k8swork1 deployment]# kubectl rollout history deployment nginx
+deployment.apps/nginx
+REVISION  CHANGE-CAUSE
+1         <none>
+2         kubectl set image deploy nginx nginx=nginx:1.15.3 --record=true
+3         kubectl set image deploy nginx nginx=nginx:1.15.4 --record=true
+4         kubectl set image deploy nginx nginx=nginx:1.15.5 --record=true
+#回滚到上个版本
+kubectl rollout undo deployment nginx
+[root@centos78k8swork1 deployment]# kubectl rollout undo deployment nginx
+deployment.apps/nginx rolled back
+
+[root@centos78k8swork1 deployment]# kubectl get deployments.apps  nginx
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE
+nginx   3/3     3            3           71m
+[root@centos78k8swork1 deployment]# kubectl get deployments.apps -o yaml | grep nginx
+      kubernetes.io/change-cause: kubectl set image deploy nginx nginx=nginx:1.15.4
+      app: nginx
+    name: nginx
+        app: nginx
+          app: nginx
+        - image: nginx:1.15.4
+          name: nginx
+      message: ReplicaSet "nginx-6cdd5dd489" has successfully progressed.
+# 进行多次更新
+kubectl set image deploy nginx nginx=nginx:1.15.5 --record
+# 查看历史记录
+kubectl rollout history deploy nginx
+# 查看指定版本的信息
+kubectl rollout history deploy nginx --revision=5
+e.g.
+[root@centos78k8swork1 deployment]# kubectl rollout history deployment nginx --revision=6
+deployment.apps/nginx with revision #6
+Pod Template:
+  Labels:       app=nginx
+        pod-template-hash=df9789dc8
+  Annotations:  kubernetes.io/change-cause: kubectl set image deploy nginx nginx=nginx:1.15.5 --record=true
+  Containers:
+   nginx:
+    Image:      nginx:1.15.5
+    Port:       <none>
+    Host Port:  <none>
+    Environment:        <none>
+    Mounts:     <none>
+  Volumes:      <none>
+# 回滚到指定版本
+kubectl rollout undo deploy nginx --to-revision=5
 
 
 
