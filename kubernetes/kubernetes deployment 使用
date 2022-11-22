@@ -1,0 +1,19 @@
+1.1 deployment概念
+用于部署无状态的服务，这个最常用的控制器。一般用于管理维护企业内部无状态的微服务，比如configservice,zuul,springboot
+他可以管理多个副本的pod实现无缝迁移，自动扩容缩容，自动容灾恢复，一键回滚等功能
+
+1.2创建一个deployment
+手动创建
+kubectl create deployment  nginx --image=nginx:1.15.2
+e.g.
+[root@centos78k8swork1 ~]# kubectl create deployment  nginx --image=nginx:1.15.2
+deployment.apps/nginx created
+#查看deployment
+kubectl get deployments.apps
+# 导出yaml 文件
+kubectl get deployment nginx -o yaml > nginx-deploy.yaml
+# 修改副本数后 replace
+ kubectl replace -f nginx-deploy.yaml
+
+
+
