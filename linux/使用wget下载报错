@@ -1,0 +1,12 @@
+使用wget出现以下错误
+
+wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
+
+ERROR: The certificate of ‘github.com’ is not trusted.
+ERROR: The certificate of ‘github.com’ doesn't have a known issuer.
+解决方案如下
+
+wget --no-check-certificate  https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
+
+需要添加：
+--no-check-certificate
