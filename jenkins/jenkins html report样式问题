@@ -1,0 +1,83 @@
+解决 Jenkins 中无法展示 HTML 样式的问题
+问题描述
+对于测试报告来说，除了内容的简洁精炼，样式的美观也很重要。常用的做法是，采用HTML格式的文档，并搭配CSS和JS，实现自定义的样式和动画效果（例如展开、折叠等）。
+
+在Jenkins中要展示HTML文档，通常采用的方式有两种：
+
+使用HTML Publisher Plugin；
+使用Files to archive功能，在Build Artifacts中显示HTML文档链接。
+第一种方式配合插件，可以通过图形化操作实现简易配置，并且展示效果也不错；而第二种方式的优势在于使用Jenkins自带的功能，不依赖插件也能实现基本的需求。
+
+然而，不管是采用哪种方式，都有可能会遇到一种情况，就是展示出来的HTML报告样式全无。在浏览器的Network中查看资源加载情况，会发现相关的CSS和JS都没法正常加载。
+
+Refused to load the stylesheet 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' because it violates the following Content Security Policy directive: "style-src 'self'".
+Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'". Either the 'unsafe-inline' keyword, a hash ('sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY='), or a nonce ('nonce-...') is required to enable inline execution.
+Blocked script execution in 'http://10.13.0.146:8888/job/SkyPixel-SmokeTest/34/artifact/reports/SkyPixel-smoketest/34.html' because the document's frame is sandboxed and the 'allow-scripts' permission is not set.
+Refused to load the stylesheet 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' because it violates the following Content Security Policy directive: "style-src 'self'".
+问题分析
+出现该现象的原因在于Jenkins中配置的CSP（Content Security Policy）。
+
+简单地说，这是Jenkins的一个安全策略，默认会设置为一个非常严格的权限集，以防止Jenkins用户在workspace、/userContent、archived artifacts中受到恶意HTML/JS文件的攻击。
+
+默认地，该权限集会设置为：
+
+sandbox; default-src 'none'; img-src 'self'; style-src 'self';
+在该配置下，只允许加载：
+
+Jenkins服务器上托管的CSS文件
+Jenkins服务器上托管的图片文件
+而如下形式的内容都会被禁止：
+
+JavaScript
+plugins (object/embed)
+HTML中的内联样式表（Inline style sheets），以及引用的外站CSS文件
+HTML中的内联图片（Inline image definitions），以及外站引用的图片文件
+frames
+web fonts
+XHR/AJAX
+etc.
+可以看出，这个限制非常严格，在此限制下也就不难理解为什么我们的HTML没法正常展示样式了。
+
+解决方案
+临时解决方案
+要解决该问题，方式也比较简单，就是修改Content Security Policy的默认配置。
+
+修改方式为，进入Manage Jenkins->Script console，输入如下命令并进行执行。
+
+System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
+当看到如下结果后，则说明配置修改已经生效。
+
+Result
+Result: 
+再次进行构建，新生成的HTML就可以正常展示样式了。需要说明的是，该操作对之前构建生成的HTML报告无效。
+
+永久解决方案
+不过，该方法还存在一个问题：该配置只是临时生效，当重启Jenkins后，Content Security Policy又会恢复为默认值，从而HTML样式又没法展示了。
+
+当前，Jenkins官方还没有相应的解决方法，我们只能在每次启动或重启Jenkins时，重新修改该安全策略。
+
+如果手工地来重复这项工作，也是可行，但并不是一个好的解决方案。
+
+回到刚才的Script console，会发现我们执行的命令其实就是一段Groovy代码；那么，如果我们可以实现在Jenkins每次启动时自动地执行该Groovy代码，那么也就同样能解决我们的问题了。
+
+好在Jenkins已经有相应的插件：
+
+Startup Trigger: 可实现在Jenkins节点(master/slave)启动时触发构建；
+Groovy plugin: 可实现直接执行Groovy代码。
+搜索安装startup-trigger-plugin和Groovy插件后，我们就可以进行配置了。
+
+配置方式如下：
+
+新建一个job，该job专门用于Jenkins启动时执行的配置命令；
+在Build Triggers模块下，勾选Build when job nodes start；
+在Build模块下，Add build step->Execute system Groovy script，在Groovy Script中输入配置命令，System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")。
+需要注意的是，添加构建步骤的时候，应该选择Execute system Groovy script，而不是Execute Groovy script。关于这两者之间的差异，简单地说，Groovy Script相当于是运行在master/slave系统JVM环境中，而system groovy script，则是运行在Jenkins master的JVM环境中，与前面提到的Jenkins Script Console功能相同。如需了解更多信息，可查看Groovy plugin的详细说明。
+
+至此，我们就彻底解决HTML样式展示异常的问题了。
+
+但还有一点需要格外注意，在本文的演示中，我们修改CSP（Content Security Policy）配置时关闭了的所有安全保护策略，即将hudson.model.DirectoryBrowserSupport.CSP设置为空，其实这是存在很大的安全隐患的。
+
+正确的做法，我们应该是结合项目的实际情况，选择对应的安全策略。例如，如果我们需要开启脚本文件加载，但是只限于Jenkins服务器上托管的CSS文件，那么就可以采用如下配置。
+
+System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox; style-src 'self';")
+除此之外，CSP可以实现非常精细的权限配置，详细配置可参考Content Security Policy Reference。
