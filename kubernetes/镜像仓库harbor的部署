@@ -1,0 +1,34 @@
+下载
+wget https://github.com/goharbor/harbor/releases/download/v1.10.6/harbor-offline-installer-v1.10.6.tgz
+
+tar xvf harbor-offline-installer-v1.10.6.tgz
+
+cd harbor/
+
+还需要下载docker-compose
+我本地有下载 官网下载卡的很
+下载后移动到指定目录 并添加权限
+mv docker-compose-Linux-x86_64-1.22.0 /usr/local/bin/docker-compose
+chmod  +x /usr/local/bin/docker-compose
+安装好后验证docker-compose
+docker-compose --version
+
+启动停止
+docker-compose start
+docker-compose stop
+
+修改配置操作
+如果需要更改harbor的配置项，可按以下步骤进行修改更新
+docker-compose down -v
+vim /usr/local/harbor/harbor.yml
+./prepare
+docker-compose up -d
+
+
+修改hostname为本机ip
+vim harbor.yml
+hostname: 10.239.219.159
+注释掉https 相关的配置
+配置并安装
+./prepare
+./install.sh
