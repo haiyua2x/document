@@ -14,6 +14,18 @@ kubectl get deployments.apps
 kubectl get deployment nginx -o yaml > nginx-deploy.yaml
 # 修改副本数后 replace
  kubectl replace -f nginx-deploy.yaml
+状态解释 
+[root@centos78k8swork1 deployment]# kubectl get deployments.apps  -owide
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
+nginx   3/3     3            3           42m   nginx        nginx:1.15.2   app=nginx
+
+NAME: deployment名称
+READY： Pod的状态，已经ready的个数
+UP-TO-DATE： 已经达到期望状态的被更新的副本数
+AVAILABLE： 已经可以用的副本数
+AGE： 显示应用程式运行的时间
+CONTAINERS: 容器名称
+IMAGES: 容器的镜像
 
 
 
