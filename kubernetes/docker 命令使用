@@ -1,0 +1,54 @@
+### 删除镜像
+Docker rmi [镜像名称或ID]
+-f 强制删除
+
+### 清理镜像
+Docker image prune
+参数:
+-a 清理所有未被使用的镜像
+-f 强制清理
+
+Docker run 
+-d  以守护进程方式启动
+-p  做固定端口映射
+-P 做随机端口映射
+--name : 设置容易的名称
+
+
+###查看容器列表
+Docker ps: 查看本机正在运行的容器
+-a 查看本机所有的容器
+-q 只查看容器id
+
+### 停止或启动
+docker stop [容器名称|id]
+docker start 
+
+### 删除容器
+docker rm [参数] [容器名称或ID]
+-f 强制删除
+
+仓库
+### 登录
+docker login [仓库url]/[命名空间]/[仓库名称]:[版本号] 
+
+### tag
+docker tag [镜像名称或id] [新的名称]
+
+### 推送镜像
+docker push [镜像名称]
+
+### 拉取镜像
+docker pull [镜像名称]
+
+### dockerfile
+FROM : 指定基础镜像
+ADD： 将本地文件添加到镜像内(自动解压[tar])
+COPY: 将本地文件复制到镜像内[不支持自动解压]
+RUN： 执行一个命令，结果反应在镜像中
+EXPOSE: 指定暴露端口
+ONBUILD: 当容易被当作基础镜像时使用（后面跟dockerfile指令）
+CMD: 指定容器启动的默认命令
+VOLUME: 指定需要挂载的目录或文件
+
+注意：build 创建一个目录单独构建，不要在根目录编写dockerfile 更不要在根目录构建
