@@ -118,8 +118,44 @@ kubectl scale --replicas=3 deploy nginx
 kubectl scale --replicas=4 deployment nginx
 
 # deployment 更新暂停和恢复
-# deployment 更新注意事项
+deployment 暂停功能
+kubectl rollout pause deployment nginx
+[root@centos78k8swork1 ~]# kubectl rollout pause deployment nginx
+deployment.apps/nginx paused
+# 第一次更新
+[root@centos78k8swork1 ~]# kubectl set image deploy nginx nginx=ngin.1.15.3 --record
+deployment.apps/nginx image updated
+# 第二次更新 添加内存cpu配置
+kubectl set resources deploy nginx -c nginx --limits=cpu=200m,memory=128Mi --requests=cpu=10m,memory=64Mi
+# 查看pod是否被更新
+[root@centos78k8swork1 ~]# kubectl get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-565979ccb4-86hlj   1/1     Running   0          19m
+nginx-565979ccb4-8g2ms   1/1     Running   0          19m
+nginx-565979ccb4-9pk9n   1/1     Running   0          19m
+nginx-565979ccb4-c2sbz   1/1     Running   0          9m22s
+# 恢复更新
+kubectl rollout resume deploy nginx
+[root@centos78k8swork1 ~]# kubectl rollout resume deploy nginx
+deployment.apps/nginx resumed
+[root@centos78k8swork1 ~]# kubectl get pod
+NAME                     READY   STATUS              RESTARTS   AGE
+nginx-565979ccb4-86hlj   1/1     Running             0          20m
+nginx-565979ccb4-8g2ms   1/1     Running             0          20m
+nginx-565979ccb4-9pk9n   1/1     Running             0          20m
+nginx-565979ccb4-c2sbz   0/1     Terminating         0          10m
+nginx-6db74d8457-dnhjj   0/1     ContainerCreating   0          3s
+nginx-6db74d8457-pf99d   0/1     ContainerCreating   0          3s
 
+
+# deployment 更新注意事项
+spec.revisionHistoryLimit： 设置保留RS旧的revision的个数，设置为0的话，不保留历史数据
+spec.minReadySeconds: 可选参数，指定新创建的pod在没有任何容器崩溃的情况下视为ready 最小的秒数，默认为0，即一旦被创建旧视为可用
+滚动更新的策略：
+.spec.stragey.type: 更新deployment方式默认为RollingUpdate
+RolloingUpdate: 滚动更新，可用指定maxSurge和maxUnavailable
+maxUnavailable:指定在回滚或更新时最大不可用的pod数量，可选字段，默认为25%，可用设置成数字或百分比。如果设置为0，那么maxSurge就不能为0
+maxSurge: 可以超过期望值的最大pod数，可选，默认为25%，如果该值为0，那么maxUaailable不能为0
 
 
 
