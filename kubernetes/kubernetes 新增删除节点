@@ -1,0 +1,60 @@
+1.删除node节点
+master上查看节点
+kubectl get node
+
+首先驱逐节点
+kubectl drain <node name> --ignore-daemonsets
+
+master上执行删除节点
+kubectl delete node <nodename>
+
+2. 在node节点上执行kubeadm reset
+#kubeadm reset
+注：谨慎操作 需要确认集群
+
+k8s-后期添加node接口
+由于kubeadm前期安装完成后join使用 token 过期时间为(24小时过期)，所以需要重新生成token
+重新生成新的token
+[root@k8s-master ~]# kubeadm token create
+W0522 12:29:55.879191   12368 configset.go:348] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
+rkv6b7.zee4rywuo0ywg04s
+
+查看是否存在有效的 token 值
+[root@k8s-master ~]# kubeadm token list
+TOKEN                     TTL         EXPIRES                     USAGES                   DESCRIPTION                                                EXTRA GROUPS
+rkv6b7.zee4rywuo0ywg04s   23h         2021-05-23T12:29:55+08:00   authentication,signing   <none>                                                     system:bootstrappers:kubeadm:default-node-token
+
+
+# 获取CA证书 sha256 编码 hash 值
+
+[root@k8s-master ~]# openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+ae10cf364184d37cd3289c996659ee434f3a54c2bc8b80aadc5a68888ff7486a
+
+# 执行node节点加入
+
+kubeadm join 10.239.174.145:6443 --token 3w1clo.771b6jug196t9t7k   --discovery-token-ca-cert-hash sha256:5ae2d87362a28607477c958c1502455240aa7a51c0efb40ba635f5f6d73b09e3
+
+[root@k8s-node02 ~]# kubeadm join 172.17.0.13:6443 --token rkv6b7.zee4rywuo0ywg04s     --discovery-token-ca-cert-hash sha256:ae10cf364184d37cd3289c996659ee434f3a54c2bc8b80aadc5a68888ff7486a
+[preflight] Running pre-flight checks
+	[WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+	[WARNING SystemVerification]: this Docker version is not on the list of validated versions: 20.10.6. Latest validated version: 19.03
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+
+k8s master端验证是否正常
+
+[root@k8s-master ~]# kubectl get nodes
+NAME         STATUS   ROLES    AGE     VERSION
+k8s-master   Ready    master   4d22h   v1.19.0
+k8s-node01   Ready    <none>   4d22h   v1.19.0
+k8s-node02   Ready    <none>   2m48s   v1.19.0
