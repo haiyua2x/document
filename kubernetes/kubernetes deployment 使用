@@ -156,6 +156,7 @@ spec.minReadySeconds: 可选参数，指定新创建的pod在没有任何容器�
 RolloingUpdate: 滚动更新，可用指定maxSurge和maxUnavailable
 maxUnavailable:指定在回滚或更新时最大不可用的pod数量，可选字段，默认为25%，可用设置成数字或百分比。如果设置为0，那么maxSurge就不能为0
 maxSurge: 可以超过期望值的最大pod数，可选，默认为25%，如果该值为0，那么maxUaailable不能为0
+Recreate: 重建，先删除旧的pod，在创建新的pod
 
 
 
